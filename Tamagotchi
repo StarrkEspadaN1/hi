@@ -1,0 +1,157 @@
+using System;
+using System.Timers;
+using System.Windows.Forms;
+using System.Threading;
+
+namespace TamagotchiApp
+{
+    public class Tamagotchi
+    {
+        private PetState state = PetState.Healthy;
+        private int ignoredRequests = 0;
+        private RequestType lastRequest;
+        private Timer requestTimer;
+        private DateTime deathTime;
+
+        private static readonly Random random = new Random();
+
+        public Tamagotchi()
+        {
+            int lifetimeSeconds = random.Next(60, 121);
+            deathTime = DateTime.Now.AddSeconds(lifetimeSeconds);
+            Console.WriteLine($"Ваш питомец будет жить {lifetimeSeconds} секунд.");
+            Console.WriteLine("Постарайтесь заботиться о нём!\n");
+        }
+
+        public void Start()
+        {
+            AsciiArt.DrawHealthy();
+
+            requestTimer = new Timer(5000);
+            requestTimer.Elapsed += OnRequestTimer;
+            requestTimer.AutoReset = true;
+            requestTimer.Start();
+
+            while (state != PetState.Dead)
+            {
+                if (DateTime.Now >= deathTime && state != PetState.Dead)
+                {
+                    Die("Ваш питомец прожил свою жизнь и умер от старости.");
+                    break;
+                }
+                Thread.Sleep(500);
+            }
+
+            Console.WriteLine("\nИгра окончена. Нажмите любую клавишу для выхода...");
+            Console.ReadKey();
+        }
+
+        private void OnRequestTimer(object sender, ElapsedEventArgs e)
+        {
+            if (state == PetState.Dead) return;
+
+            if (DateTime.Now >= deathTime)
+            {
+                Die("Ваш питомец прожил свою жизнь и умер от старости.");
+                return;
+            }
+
+            RequestType request = GetNextRequest();
+            string requestText = RequestToString(request);
+
+            DialogResult result = MessageBox.Show(
+                $"Питомец просит: {requestText}. Выполнить?",
+                "Тамагочи",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (result == DialogResult.Yes)
+            {
+                HandlePositiveResponse(request);
+            }
+            else
+            {
+                HandleNegativeResponse(request);
+            }
+        }
+
+        private RequestType GetNextRequest()
+        {
+            if (state == PetState.Sick)
+                return RequestType.Heal;
+
+            RequestType newRequest;
+            do
+            {
+                newRequest = (RequestType)random.Next(Enum.GetValues(typeof(RequestType)).Length);
+            } while (newRequest == lastRequest);
+            lastRequest = newRequest;
+            return newRequest;
+        }
+
+        private string RequestToString(RequestType req)
+        {
+            return req switch
+            {
+                RequestType.Feed => "Покормить",
+                RequestType.Walk => "Погулять",
+                RequestType.Sleep => "Уложить спать",
+                RequestType.Play => "Поиграть",
+                RequestType.Heal => "Полечить",
+                _ => ""
+            };
+        }
+
+        private void HandlePositiveResponse(RequestType request)
+        {
+            ignoredRequests = 0;
+
+            if (request == RequestType.Heal && state == PetState.Sick)
+            {
+                state = PetState.Healthy;
+                MessageBox.Show("Питомец выздоровел!", "Тамагочи", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                AsciiArt.DrawHealthy();
+            }
+            else if (request == RequestType.Heal && state == PetState.Healthy)
+            {
+                MessageBox.Show("Спасибо, но я здоров!", "Тамагочи", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show("Спасибо! Я счастлив.", "Тамагочи", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void HandleNegativeResponse(RequestType request)
+        {
+            ignoredRequests++;
+
+            if (state == PetState.Sick && request == RequestType.Heal)
+            {
+                Die("Вы отказались лечить питомца, и он умер.");
+                return;
+            }
+
+            if (!state.Equals(PetState.Sick) && ignoredRequests >= 3)
+            {
+                state = PetState.Sick;
+                MessageBox.Show("Питомец заболел из-за невнимания! Теперь ему нужно лекарство.", "Тамагочи", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                AsciiArt.DrawSick();
+            }
+            else
+            {
+                MessageBox.Show($"Вы отказали. Осталось невыполненных просьб: {ignoredRequests}/3.", "Тамагочи", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void Die(string reason)
+        {
+            if (state == PetState.Dead) return;
+            state = PetState.Dead;
+            requestTimer.Stop();
+            AsciiArt.DrawDead();
+            Console.WriteLine($"\n{reason}");
+            MessageBox.Show(reason, "Тамагочи", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+    }
+}
