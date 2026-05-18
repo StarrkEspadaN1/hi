@@ -1,0 +1,18 @@
+namespace TamagotchiApp
+{
+    public enum PetState
+    {
+        Healthy,
+        Sick,
+        Dead
+    }
+
+    public enum RequestType
+    {
+        Feed,
+        Walk,
+        Sleep,
+        Play,
+        Heal
+    }
+}
