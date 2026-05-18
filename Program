@@ -1,0 +1,14 @@
+using System;
+
+namespace TamagotchiApp
+{
+    class Program
+    {
+        [STAThread]
+        static void Main()
+        {
+            Tamagotchi pet = new Tamagotchi();
+            pet.Start();
+        }
+    }
+}
