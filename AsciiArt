@@ -1,0 +1,49 @@
+using System;
+
+namespace TamagotchiApp
+{
+    public static class AsciiArt
+    {
+        private const string HealthyArt = @"
+               /\_/\  
+              ( o.o ) 
+               > ^ <
+            ";
+
+        private const string SickArt = @"
+               /\_/\  
+              ( x.x ) 
+               > ^ <
+            ";
+
+        private const string DeadArt = @"
+               /\_/\  
+              ( -.- ) 
+               > ^ <
+            ";
+
+        public static void DrawHealthy()
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(HealthyArt);
+            Console.ResetColor();
+            Console.WriteLine("Питомец здоров.");
+        }
+
+        public static void DrawSick()
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(SickArt);
+            Console.ResetColor();
+            Console.WriteLine("Питомец болен!");
+        }
+
+        public static void DrawDead()
+        {
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine(DeadArt);
+            Console.ResetColor();
+            Console.WriteLine("Питомец умер...");
+        }
+    }
+}
