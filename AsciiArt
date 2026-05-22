@@ -10,13 +10,13 @@ namespace TamagotchiApp
                > ^ <
             ";
 
-        private const string SickArt = @"
+        private const string DeadArt = @"
                /\_/\  
               ( x.x ) 
                > ^ <
             ";
 
-        private const string DeadArt = @"
+        private const string SickArt = @"
                /\_/\  
               ( -.- ) 
                > ^ <
